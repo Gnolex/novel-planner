@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gnolex Novel Planner & Writer</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+/* =========================================================
+   CSS — Warm theme, layout, focus mode, book/print styles
+   ========================================================= */
+:root{
+  --accent:#e0784f;
+  --accent-dark:#c05f39;
+  --accent-light:#fbe8de;
+  --bg:#faf8f5;
+  --card-bg:#ffffff;
+  --paper-bg:#fbf7ef;
+  --text:#2e2a26;
+  --muted:#8a8078;
+  --border:#ece5db;
+  --radius:14px;
+  --shadow:0 2px 10px rgba(60,40,20,0.08);
+  --editor-font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif;
+  --editor-font-size:19px;
+}
+body{ background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; padding-bottom:3rem; }
+*{ transition:background-color .15s ease, box-shadow .15s ease, border-color .15s ease, transform .15s ease; }
+.text-longform, .book-page, .manuscript-editor{ font-family:Georgia,"Iowan Old Style",serif; }
+
+.app-header{ position:sticky; top:0; z-index:1030; background:var(--card-bg); border-bottom:1px solid var(--border); padding:.75rem 1rem; }
+.app-header h1{ font-size:1.35rem; margin:0; font-weight:700; color:var(--accent-dark); }
+.header-progress-wrap{ min-width:220px; }
+.header-progress-label{ font-size:.75rem; color:var(--muted); }
+.progress{ background:var(--accent-light); border-radius:999px; height:.85rem; }
+.progress-bar.accent-bar{ background-color:var(--accent); }
+
+.nav-pills{ margin:1rem 0; flex-wrap:wrap; }
+.nav-pills .nav-link{ color:var(--text); border:1px solid var(--border); border-radius:999px; margin-right:.4rem; margin-bottom:.4rem; }
+.nav-pills .nav-link.active{ background-color:var(--accent); border-color:var(--accent); }
+
+.action-bar{ background:var(--card-bg); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:.75rem 1rem; margin-bottom:1rem; display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; }
+.btn{ border-radius:10px; }
+.btn-accent{ background:var(--accent); border-color:var(--accent); color:#fff; }
+.btn-accent:hover{ background:var(--accent-dark); border-color:var(--accent-dark); color:#fff; }
+.last-saved-text{ font-size:.85rem; color:var(--muted); }
+
+.panel-card{ border:1px solid var(--border); background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+.panel-card .card-header{ cursor:pointer; background:var(--accent-light); user-select:none; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.5rem; border:none; }
+.panel-card .card-header:hover{ background:#f7ddd0; }
+.chevron{ display:inline-block; width:1rem; color:var(--accent-dark); font-weight:700; }
+.panel-collapse{ display:none; }
+.panel-collapse.show{ display:block; }
+.header-actions .btn{ padding:.15rem .5rem; line-height:1.2; }
+
+.role-badge-Protagonist{ background:var(--accent); color:#fff; }
+.role-badge-Antagonist{ background:#c0392b; color:#fff; }
+.role-badge-Supporting{ background:#8a8a8a; color:#fff; }
+.role-badge-Minor{ background:#c7c7c7; color:#333; }
+.status-badge-NotStarted{ background:#adb5bd; color:#fff; }
+.status-badge-Drafting{ background:var(--accent); color:#fff; }
+.status-badge-Revising{ background:#e0a106; color:#fff; }
+.status-badge-Done{ background:#2e9e5b; color:#fff; }
+
+.trait-badge{ background:var(--accent-light); color:var(--accent-dark); border:1px solid var(--accent); border-radius:999px; padding:.2rem .6rem; font-size:.8rem; display:inline-flex; align-items:center; gap:.35rem; }
+.trait-badge .remove-trait{ cursor:pointer; font-weight:700; }
+
+.section-card{ background:var(--card-bg); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:1.25rem; margin-bottom:1.25rem; }
+.dash-stat{ background:var(--card-bg); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:1rem; height:100%; }
+.status-bar-row{ display:flex; align-items:center; gap:.5rem; margin-bottom:.5rem; }
+.status-bar-row .label{ width:110px; font-size:.85rem; color:var(--muted); }
+.status-bar-track{ flex:1; background:var(--accent-light); border-radius:4px; height:14px; overflow:hidden; }
+.status-bar-fill{ height:100%; background:var(--accent); }
+.status-bar-count{ width:26px; text-align:right; font-size:.85rem; }
+
+/* Manuscript workspace */
+.manuscript-shell{ display:flex; gap:1.25rem; align-items:flex-start; }
+.manuscript-shell.sidebar-hidden .ms-sidebar{ display:none; }
+.ms-sidebar{ width:250px; flex-shrink:0; background:var(--card-bg); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:.9rem; position:sticky; top:130px; max-height:75vh; overflow-y:auto; }
+.ms-main{ flex:1; min-width:0; }
+.chapter-sidebar-item{ padding:.5rem .6rem; border-radius:10px; cursor:pointer; margin-bottom:.35rem; border:1px solid transparent; }
+.chapter-sidebar-item:hover{ background:var(--accent-light); }
+.chapter-sidebar-item.active{ background:var(--accent-light); border-color:var(--accent); }
+.chapter-sidebar-item .csi-title{ font-weight:600; font-size:.88rem; }
+.chapter-sidebar-item .csi-meta{ font-size:.72rem; color:var(--muted); display:flex; justify-content:space-between; align-items:center; margin-top:.15rem; }
+
+.ms-toolbar{ display:flex; flex-wrap:wrap; gap:.85rem; align-items:flex-end; background:var(--card-bg); border:1px solid var(--border); border-radius:var(--radius); padding:.85rem; margin-bottom:1rem; box-shadow:var(--shadow); }
+
+.manuscript-editor{ background:var(--paper-bg); border:1px solid var(--border); border-radius:var(--radius); padding:3rem 2.5rem; min-height:60vh; max-width:720px; margin:0 auto; box-shadow:var(--shadow); line-height:1.8; outline:none; font-family:var(--editor-font-family); font-size:var(--editor-font-size); }
+.manuscript-editor:focus{ box-shadow:0 0 0 3px var(--accent-light); }
+.manuscript-editor p{ margin:0 0 1em 0; text-indent:1.5em; }
+.manuscript-editor p:first-child{ text-indent:0; }
+.scene-break{ text-align:center; text-indent:0 !important; letter-spacing:.3em; color:var(--muted); margin:1.5em 0 !important; }
+
+.book-page{ background:var(--paper-bg); border:1px solid var(--border); border-radius:var(--radius); padding:3rem 2.5rem; max-width:720px; margin:0 auto 2rem auto; box-shadow:var(--shadow); line-height:1.8; font-family:var(--editor-font-family); font-size:var(--editor-font-size); }
+.book-page .chapter-heading{ text-align:center; margin-bottom:1.5rem; font-weight:700; }
+.book-page p{ margin:0 0 1em 0; text-indent:1.5em; }
+.book-page p:first-child{ text-indent:0; }
+
+.focus-overlay{ position:fixed; inset:0; background:var(--bg); z-index:2000; display:flex; flex-direction:column; }
+.focus-topbar{ display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.75rem 1.5rem; border-bottom:1px solid var(--border); background:var(--card-bg); }
+.focus-editor-mount{ flex:1; overflow-y:auto; padding:2rem 1rem; }
+.focus-editor-mount .manuscript-editor{ min-height:80vh; }
+body.focus-active{ overflow:hidden; }
+
+.saved-toast{ position:fixed; bottom:1.25rem; right:1.25rem; background:#2e9e5b; color:#fff; padding:.5rem 1rem; border-radius:999px; box-shadow:var(--shadow); z-index:2100; opacity:0; transform:translateY(8px); }
+.saved-toast.visible{ opacity:1; transform:translateY(0); }
+.milestone-toast{ position:fixed; top:5.5rem; right:1.25rem; background:var(--accent); color:#fff; padding:.6rem 1.1rem; border-radius:999px; box-shadow:var(--shadow); z-index:2100; opacity:0; transform:translateY(-8px); }
+.milestone-toast.visible{ opacity:1; transform:translateY(0); }
+
+.quick-insert-popup{ position:absolute; z-index:1500; width:290px; background:var(--card-bg); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:.75rem; }
+.quick-insert-results{ max-height:220px; overflow-y:auto; }
+.quick-insert-result-item{ padding:.35rem .5rem; border-radius:6px; cursor:pointer; font-size:.85rem; }
+.quick-insert-result-item:hover{ background:var(--accent-light); }
+
+#printOutline, #printManuscript{ display:none; }
+
+@media print{
+  .app-header, .nav-pills, .action-bar, #mainTabContent, .focus-overlay, .saved-toast, .milestone-toast, .quick-insert-popup{ display:none !important; }
+  body{ background:#fff; color:#000; padding:0; }
+  body.print-mode-outline #printOutline{ display:block !important; }
+  body.print-mode-manuscript #printManuscript{ display:block !important; }
+  #printOutline, #printManuscript{ font-family:Georgia,"Times New Roman",serif; color:#000; }
+  #printOutline h2{ border-bottom:1px solid #000; padding-bottom:.25rem; margin-top:1.5rem; }
+  .print-title-page{ text-align:center; padding-top:35vh; page-break-after:always; }
+  .print-toc{ page-break-after:always; }
+  .print-chapter-page{ page-break-before:always; }
+  .print-chapter-page p, .print-chapter-page{ text-indent:0; }
+  .print-chapter-page .print-body p{ text-indent:1.5em; margin:0 0 1em 0; }
+  @page{ margin:1in; }
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="container-fluid d-flex flex-wrap align-items-center justify-content-between gap-3">
+    <h1>Gnolex Novel Planner & Writer</h1>
+    <div class="header-progress-wrap">
+      <div class="d-flex justify-content-between header-progress-label">
+        <span>Manuscript Progress</span>
+        <span id="headerProgressText">0 / 0 words (0%)</span>
+      </div>
+      <div class="progress" role="progressbar" aria-label="Word count progress">
+        <div id="headerProgressBar" class="progress-bar accent-bar" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container-fluid" style="max-width:1300px;">
+
+  <ul class="nav nav-pills" id="mainTabs" role="tablist">
+    <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tab-overview" type="button">Story Overview</button></li>
+    <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-characters" type="button">Character Bible</button></li>
+    <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-plot" type="button">Plot Structure</button></li>
+    <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-manuscript" type="button">Manuscript</button></li>
+    <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-world" type="button">World-Building Notes</button></li>
+    <li class="nav-item" role="presentation"><button class="nav-link" id="dashboardTabBtn" data-bs-toggle="pill" data-bs-target="#tab-dashboard" type="button">Dashboard</button></li>
+  </ul>
+
+  <div class="action-bar">
+    <button id="saveBtn" class="btn btn-accent">Save / Cache Project</button>
+    <span class="last-saved-text" id="lastSavedText">Not saved yet</span>
+    <button id="clearSavedBtn" class="btn btn-outline-secondary btn-sm">Clear Saved Project</button>
+    <button id="resetAllBtn" class="btn btn-outline-danger btn-sm">Reset / Clear All</button>
+    <button id="printOutlineBtn" class="btn btn-outline-dark btn-sm ms-auto">Print Outline Only</button>
+  </div>
+  <div id="storageWarning" class="alert alert-warning d-none" role="alert"></div>
+
+  <div id="mainTabContent" class="tab-content">
+
+    <div class="tab-pane fade show active" id="tab-overview">
+      <div class="section-card">
+        <h2 class="h5 mb-3">Story Overview</h2>
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label">Title</label><input type="text" id="ov-title" class="form-control"></div>
+          <div class="col-md-3">
+            <label class="form-label">Genre</label>
+            <select id="ov-genre" class="form-select">
+              <option value="">-- Select --</option>
+              <option>Fantasy</option><option>Science Fiction</option><option>Mystery/Thriller</option>
+              <option>Romance</option><option>Horror</option><option>Historical Fiction</option>
+              <option>Literary Fiction</option><option>Young Adult</option><option>Contemporary</option>
+              <option value="other">Other...</option>
+            </select>
+          </div>
+          <div class="col-md-3 d-none" id="ov-genreOtherWrap"><label class="form-label">Custom Genre</label><input type="text" id="ov-genreOther" class="form-control"></div>
+          <div class="col-md-4"><label class="form-label">Target Word Count</label><input type="number" min="0" id="ov-targetWordCount" class="form-control"></div>
+          <div class="col-md-4">
+            <label class="form-label">POV Style</label>
+            <select id="ov-povStyle" class="form-select">
+              <option value="">-- Select --</option><option>1st Person</option><option>3rd Limited</option>
+              <option>3rd Omniscient</option><option>Multiple POV</option><option value="other">Other...</option>
+            </select>
+          </div>
+          <div class="col-md-4 d-none" id="ov-povOtherWrap"><label class="form-label">Custom POV Style</label><input type="text" id="ov-povOther" class="form-control"></div>
+          <div class="col-md-4">
+            <label class="form-label">Tense</label>
+            <select id="ov-tense" class="form-select"><option value="past">Past</option><option value="present">Present</option></select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Target Audience (optional)</label>
+            <select id="ov-audience" class="form-select">
+              <option value="">-- Select --</option><option value="MG">Middle Grade (MG)</option>
+              <option value="YA">Young Adult (YA)</option><option value="Adult">Adult</option>
+              <option value="other">Other...</option>
+            </select>
+          </div>
+          <div class="col-md-4 d-none" id="ov-audienceOtherWrap"><label class="form-label">Custom Audience</label><input type="text" id="ov-audienceOther" class="form-control"></div>
+          <div class="col-12"><label class="form-label">Logline / Premise</label><textarea id="ov-logline" class="form-control text-longform" rows="3"></textarea></div>
+          <div class="col-12"><label class="form-label">Themes / Tone</label><textarea id="ov-themes" class="form-control text-longform" rows="3"></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-pane fade" id="tab-characters">
+      <div class="section-card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h5 mb-0">Character Bible</h2>
+          <button id="addCharacterBtn" class="btn btn-accent btn-sm">+ Add Character</button>
+        </div>
+        <div id="characterList"></div>
+        <p id="characterEmptyMsg" class="text-muted">No characters yet. Click "+ Add Character" to begin.</p>
+      </div>
+    </div>
+
+    <div class="tab-pane fade" id="tab-plot">
+      <div class="section-card">
+        <h2 class="h5 mb-3">Plot Structure</h2>
+        <div class="row g-3 align-items-end mb-3">
+          <div class="col-md-5">
+            <label class="form-label">Structure Template</label>
+            <select id="plotTemplateSelect" class="form-select">
+              <option value="">-- Select a template --</option>
+              <option value="3act">3-Act Structure</option>
+              <option value="savethecat">Save the Cat (15 Beats)</option>
+              <option value="herosjourney">Hero's Journey (12 Stages)</option>
+              <option value="5act">5-Act Structure</option>
+              <option value="freeform">Freeform (Custom Beats)</option>
+            </select>
+          </div>
+          <div class="col-md-3" id="addBeatWrap" style="display:none;"><button id="addBeatBtn" class="btn btn-outline-secondary btn-sm">+ Add Beat</button></div>
+        </div>
+        <div class="row g-4">
+          <div class="col-lg-7">
+            <div id="plotBeatsContainer"></div>
+            <p id="plotEmptyMsg" class="text-muted">Select a structure template above to generate beat fields.</p>
+          </div>
+          <div class="col-lg-5">
+            <div class="section-card" style="background:var(--accent-light); border-color:var(--accent);">
+              <h3 class="h6">Outline Preview</h3>
+              <div id="outlinePreview" class="text-longform"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-pane fade" id="tab-manuscript">
+      <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+        <button id="toggleSidebarBtn" class="btn btn-sm btn-outline-secondary">&#9776; Chapters</button>
+        <div style="flex:1; max-width:320px;">
+          <div class="d-flex justify-content-between header-progress-label"><span>Manuscript</span><span id="msOverallProgressText"></span></div>
+          <div class="progress"><div id="msOverallProgressBar" class="progress-bar accent-bar" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div class="manuscript-shell" id="manuscriptShell">
+        <aside class="ms-sidebar" id="msSidebar">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="mb-0">Chapters</h6>
+            <button id="addChapterBtn" class="btn btn-sm btn-accent">+ Add</button>
+          </div>
+          <div id="chapterSidebarList"></div>
+          <p id="chapterEmptyMsg" class="text-muted small">No chapters yet.</p>
+        </aside>
+        <main class="ms-main">
+          <div class="ms-toolbar d-none" id="msToolbar">
+            <div class="d-flex flex-column" style="min-width:220px;">
+              <input type="text" id="msTitleInput" class="form-control form-control-sm fw-bold mb-1" placeholder="Chapter title">
+              <div class="d-flex gap-2 align-items-center">
+                <span class="small text-muted">Ch.</span>
+                <input type="text" id="msNumberInput" class="form-control form-control-sm" style="width:60px;">
+                <select id="msPovSelect" class="form-select form-select-sm"></select>
+              </div>
+            </div>
+            <div class="d-flex flex-column" style="min-width:170px;">
+              <label class="small text-muted mb-1">Progress</label>
+              <div class="progress" style="width:150px;"><div id="msProgressBar" class="progress-bar accent-bar" style="width:0%"></div></div>
+              <div class="d-flex gap-1 align-items-center mt-1">
+                <input type="number" min="0" id="msGoalInput" class="form-control form-control-sm" style="width:80px;" placeholder="Goal">
+                <span id="msProgressText" class="small text-muted"></span>
+              </div>
+            </div>
+            <div><label class="small text-muted d-block mb-1">Status</label><select id="msStatusSelect" class="form-select form-select-sm"></select></div>
+            <div class="btn-group btn-group-sm" role="group" aria-label="Formatting">
+              <button type="button" id="boldBtn" class="btn btn-outline-secondary" title="Bold"><strong>B</strong></button>
+              <button type="button" id="italicBtn" class="btn btn-outline-secondary" title="Italic"><em>I</em></button>
+              <button type="button" id="sceneBreakBtn" class="btn btn-outline-secondary" title="Insert scene break">* * *</button>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <select id="fontFamilySelect" class="form-select form-select-sm" style="width:100px;">
+                <option value="serif">Serif</option><option value="sans">Sans</option><option value="mono">Mono</option>
+              </select>
+              <button type="button" id="fontSizeDown" class="btn btn-sm btn-outline-secondary">A-</button>
+              <span id="fontSizeLabel" class="small text-muted">19px</span>
+              <button type="button" id="fontSizeUp" class="btn btn-sm btn-outline-secondary">A+</button>
+            </div>
+            <div class="btn-group btn-group-sm" role="group" aria-label="View mode">
+              <button type="button" class="btn btn-outline-secondary ms-view-btn active" data-view="write">Write</button>
+              <button type="button" class="btn btn-outline-secondary ms-view-btn" data-view="preview">Preview</button>
+              <button type="button" class="btn btn-outline-secondary ms-view-btn" data-view="full">Read Full Manuscript</button>
+            </div>
+            <button type="button" id="quickInsertBtn" class="btn btn-sm btn-outline-secondary">&#128269; Insert Reference</button>
+            <button type="button" id="focusModeBtn" class="btn btn-sm btn-outline-secondary">&#127919; Focus Mode</button>
+            <button type="button" id="printManuscriptBtn" class="btn btn-sm btn-accent ms-auto">&#128424; Print / Export as PDF</button>
+          </div>
+
+          <p id="noChapterMsg" class="text-muted">Select or add a chapter to begin writing.</p>
+
+          <div class="ms-editor-wrap d-none" id="msEditorWrap">
+            <div id="editorMount"><div id="manuscriptEditor" contenteditable="true" class="manuscript-editor"></div></div>
+          </div>
+          <div class="ms-preview-wrap d-none" id="msPreviewWrap"><div id="chapterPreviewContent" class="book-page"></div></div>
+          <div class="ms-full-wrap d-none" id="msFullWrap"><div id="fullManuscriptContent"></div></div>
+        </main>
+      </div>
+    </div>
+
+    <div class="tab-pane fade" id="tab-world">
+      <div class="section-card">
+        <h2 class="h5 mb-3">World-Building Notes</h2>
+        <div class="row g-2 align-items-end mb-3">
+          <div class="col-md-5"><label class="form-label">New Category Name</label><input type="text" id="newCategoryName" class="form-control" placeholder="e.g. Magic System Rules"></div>
+          <div class="col-md-3"><button id="addCategoryBtn" class="btn btn-accent btn-sm">+ Add Category</button></div>
+        </div>
+        <div id="worldCategoriesList"></div>
+        <p id="worldEmptyMsg" class="text-muted">No categories yet. Add one above (e.g. "Locations", "Timeline of Events").</p>
+      </div>
+    </div>
+
+    <div class="tab-pane fade" id="tab-dashboard">
+      <div class="section-card">
+        <h2 class="h5 mb-3">Dashboard / Progress Overview</h2>
+        <div class="row g-3">
+          <div class="col-md-6 col-lg-4"><div class="dash-stat text-center"><h3 class="h6">Word Count Progress</h3><div id="dashDonut"></div><div id="dashDonutText" class="mt-2 fw-bold"></div></div></div>
+          <div class="col-md-6 col-lg-4"><div class="dash-stat"><h3 class="h6">Chapter Status Breakdown</h3><div id="dashChapterStatus"></div></div></div>
+          <div class="col-md-6 col-lg-4"><div class="dash-stat text-center"><h3 class="h6">This Session</h3><div id="dashSessionWords" class="display-6 fw-bold"></div><div id="dashSessionMsg" class="small text-muted mt-1"></div></div></div>
+          <div class="col-md-6 col-lg-4"><div class="dash-stat"><h3 class="h6">Characters</h3><div id="dashCharacters"></div></div></div>
+          <div class="col-md-6 col-lg-4"><div class="dash-stat"><h3 class="h6">Plot Completion</h3><div id="dashPlotCompletion"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="focusOverlay" class="focus-overlay d-none">
+  <div class="focus-topbar">
+    <strong id="focusChapterTitle"></strong>
+    <span id="focusWordCount" class="text-muted small"></span>
+    <button id="exitFocusBtn" class="btn btn-sm btn-outline-secondary">Exit Focus Mode &#10005;</button>
+  </div>
+  <div id="focusEditorMount" class="focus-editor-mount"></div>
+</div>
+
+<div id="quickInsertPopup" class="quick-insert-popup d-none">
+  <input type="text" id="quickInsertSearch" class="form-control form-control-sm mb-2" placeholder="Search characters & notes...">
+  <div id="quickInsertResults" class="quick-insert-results"></div>
+</div>
+
+<div id="savedToast" class="saved-toast d-none">Saved &#10003;</div>
+<div id="milestoneToast" class="milestone-toast d-none"></div>
+
+<div id="printOutline"></div>
+<div id="printManuscript"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* =========================================================
+   JS — Constants
+   ========================================================= */
+var STORAGE_KEY = "gnolexNovelData";
+var ROLES = ["Protagonist","Antagonist","Supporting","Minor"];
+var STATUSES = ["Not Started","Drafting","Revising","Done"];
+var PLOT_TEMPLATES = {
+  "3act": { label:"3-Act Structure", beats:[
+    "Act 1: Setup","Inciting Incident","Plot Point 1 (Break Into Two)","Rising Action","Midpoint","Plot Point 2 (Break Into Three)","Climax","Falling Action","Resolution"
+  ]},
+  "savethecat": { label:"Save the Cat (15 Beats)", beats:[
+    "Opening Image","Theme Stated","Set-Up","Catalyst","Debate","Break Into Two","B Story","Fun and Games","Midpoint","Bad Guys Close In","All Is Lost","Dark Night of the Soul","Break Into Three","Finale","Final Image"
+  ]},
+  "herosjourney": { label:"Hero's Journey (12 Stages)", beats:[
+    "Ordinary World","Call to Adventure","Refusal of the Call","Meeting the Mentor","Crossing the Threshold","Tests, Allies, Enemies","Approach to the Inmost Cave","Ordeal","Reward (Seizing the Sword)","The Road Back","Resurrection","Return with the Elixir"
+  ]},
+  "5act": { label:"5-Act Structure", beats:[
+    "Exposition","Rising Action","Climax","Falling Action","Denouement"
+  ]},
+  "freeform": { label:"Freeform (Custom Beats)", beats:[] }
+};
+
+/* =========================================================
+   JS — Data model
+   ========================================================= */
+var uidSeed = Date.now();
+function uid(prefix){ uidSeed += 1; return prefix + "_" + uidSeed.toString(36); }
+
+function defaultData(){
+  return {
+    overview:{ title:"", genre:"", genreOther:"", logline:"", targetWordCount:80000, povStyle:"", povOther:"", tense:"past", audience:"", audienceOther:"", themes:"" },
+    characters: [],
+    plot:{ template:"", beats:[] },
+    chapters: [],
+    worldCategories: [],
+    panels:{ characters:{}, worldCategories:{}, sidebarCollapsed:false },
+    prefs:{ fontFamily:"serif", fontSize:19, focusMode:false, manuscriptView:"write" },
+    currentChapterId: null,
+    lastSaved: null
+  };
+}
+
+function normalizeData(parsed){
+  var base = defaultData();
+  var merged = Object.assign({}, base, parsed || {});
+  merged.overview = Object.assign({}, base.overview, (parsed && parsed.overview) || {});
+  merged.panels = Object.assign({}, base.panels, (parsed && parsed.panels) || {});
+  merged.prefs = Object.assign({}, base.prefs, (parsed && parsed.prefs) || {});
+  merged.plot = Object.assign({ template:"", beats:[] }, (parsed && parsed.plot) || {});
+  merged.plot.beats = (merged.plot.beats || []).map(function(b){ return Object.assign({ chapterId:"" }, b); });
+  merged.characters = ((parsed && parsed.characters) || []).map(function(c){
+    return Object.assign({ id:uid("char"), name:"", role:"Protagonist", age:"", description:"", traits:[], backstory:"", motivation:"", internalConflict:"", externalConflict:"", arcStart:"", arcEnd:"", relationships:[] }, c);
+  });
+  merged.chapters = ((parsed && parsed.chapters) || []).map(function(c){
+    return Object.assign({ id:uid("chap"), number:"", title:"", povCharId:"", content:"", wordGoal:0, wordActual:0, status:"Not Started" }, c);
+  });
+  merged.worldCategories = ((parsed && parsed.worldCategories) || []).map(function(wc){
+    return Object.assign({ id:uid("cat"), name:"", entries:[] }, wc);
+  });
+  merged.currentChapterId = (parsed && parsed.currentChapterId) || null;
+  return merged;
+}
+
+var data = defaultData();
+var sessionStartWords = 0;
+var lastMilestone = 0;
+var savedRange = null;
+var wordCountDebounceTimer = null;
+
+/* =========================================================
+   JS — Small utilities
+   ========================================================= */
+function esc(s){
+  return (s === null || s === undefined ? "" : String(s)).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];
+  });
+}
+function nl2br(s){ return esc(s).replace(/\n/g,"<br>"); }
+function statusClass(status){ return (status || "Not Started").replace(/\s+/g,""); }
+function num(v){ var n = Number(v); return isNaN(n) ? 0 : n; }
+function moveItem(arr, id, dir){
+  var idx = arr.findIndex(function(x){ return x.id === id; });
+  if (idx < 0) return;
+  var newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= arr.length) return;
+  var tmp = arr[idx]; arr[idx] = arr[newIdx]; arr[newIdx] = tmp;
+}
+function wordsFromHtml(html){
+  var withBreaks = (html || "").replace(/<\/(p|div|li|h[1-6])>/gi, "$&\n").replace(/<br\s*\/?>/gi, "\n");
+  var tmp = document.createElement("div");
+  tmp.innerHTML = withBreaks;
+  var text = (tmp.textContent || "").trim();
+  return text ? text.split(/\s+/).filter(Boolean).length : 0;
+}
+function getCurrentChapter(){
+  return data.chapters.find(function(c){ return c.id === data.currentChapterId; }) || null;
+}
+function totalManuscriptWords(){
+  return data.chapters.reduce(function(s, c){ return s + num(c.wordActual); }, 0);
+}
+function chapterLabel(chapter){
+  return "Ch. " + chapter.number + (chapter.title ? ": " + chapter.title : "");
+}
+function chapterExcerptText(chapter){
+  var withBreaks = (chapter.content || "").replace(/<\/(p|div|li|h[1-6])>/gi, "$&\n").replace(/<br\s*\/?>/gi, "\n");
+  var tmp = document.createElement("div");
+  tmp.innerHTML = withBreaks;
+  var text = (tmp.textContent || "").trim().replace(/\s+/g," ");
+  if (!text) return "(No content yet.)";
+  return text.length > 180 ? text.slice(0,180) + "…" : text;
+}
+
+/* =========================================================
+   JS — Panel-state tracker
+   ========================================================= */
+function isOpen(kind, id){ return !!data.panels[kind][id]; }
+function setOpen(kind, id, val){ data.panels[kind][id] = val; }
+function togglePanelState(kind, id){ data.panels[kind][id] = !data.panels[kind][id]; }
+
+/* =========================================================
+   JS — Relationship / dropdown auto-population logic
+   ========================================================= */
+function characterOptionsHtml(selectedId, excludeId){
+  var html = '<option value="">— None —</option>';
+  data.characters.forEach(function(c){
+    if (excludeId && c.id === excludeId) return;
+    html += '<option value="' + c.id + '" data-char-ref="' + c.id + '"' + (c.id === selectedId ? " selected" : "") + '>' + (esc(c.name) || "(unnamed)") + "</option>";
+  });
+  return html;
+}
+function refreshCharacterOptionLabels(id, newName){
+  document.querySelectorAll('option[data-char-ref="' + id + '"]').forEach(function(opt){
+    opt.textContent = newName || "(unnamed)";
+  });
+}
+function refreshMsPovSelect(){
+  var sel = document.getElementById("msPovSelect");
+  if (!sel) return;
+  var chapter = getCurrentChapter();
+  sel.innerHTML = characterOptionsHtml(chapter ? chapter.povCharId : "");
+}
+
+function chapterOptionsHtml(selectedId){
+  var html = '<option value="">— Not linked —</option>';
+  data.chapters.forEach(function(c){
+    html += '<option value="' + c.id + '" data-chap-ref="' + c.id + '"' + (c.id === selectedId ? " selected" : "") + '>' + esc(chapterLabel(c)) + "</option>";
+  });
+  return html;
+}
+function refreshChapterOptionLabels(id, newLabel){
+  document.querySelectorAll('option[data-chap-ref="' + id + '"]').forEach(function(opt){
+    opt.textContent = newLabel;
+  });
+}
+function refreshPlotChapterSelects(){
+  document.querySelectorAll(".beat-chapter-select").forEach(function(sel){
+    var row = sel.closest("[data-beat-id]");
+    var beat = data.plot.beats.find(function(b){ return b.id === row.dataset.beatId; });
+    if (!beat) return;
+    if (beat.chapterId && !data.chapters.find(function(c){ return c.id === beat.chapterId; })) beat.chapterId = "";
+    sel.innerHTML = chapterOptionsHtml(beat.chapterId);
+  });
+}
+
+/* =========================================================
+   JS — Render: Story Overview
+   ========================================================= */
+function fillOverviewForm(){
+  var o = data.overview;
+  document.getElementById("ov-title").value = o.title || "";
+  document.getElementById("ov-genre").value = o.genre || "";
+  document.getElementById("ov-genreOther").value = o.genreOther || "";
+  document.getElementById("ov-genreOtherWrap").classList.toggle("d-none", o.genre !== "other");
+  document.getElementById("ov-targetWordCount").value = o.targetWordCount || 0;
+  document.getElementById("ov-povStyle").value = o.povStyle || "";
+  document.getElementById("ov-povOther").value = o.povOther || "";
+  document.getElementById("ov-povOtherWrap").classList.toggle("d-none", o.povStyle !== "other");
+  document.getElementById("ov-tense").value = o.tense || "past";
+  document.getElementById("ov-audience").value = o.audience || "";
+  document.getElementById("ov-audienceOther").value = o.audienceOther || "";
+  document.getElementById("ov-audienceOtherWrap").classList.toggle("d-none", o.audience !== "other");
+  document.getElementById("ov-logline").value = o.logline || "";
+  document.getElementById("ov-themes").value = o.themes || "";
+}
+
+function bindOverviewForm(){
+  document.getElementById("ov-title").addEventListener("input", function(e){ data.overview.title = e.target.value; });
+  document.getElementById("ov-genre").addEventListener("input", function(e){
+    data.overview.genre = e.target.value;
+    document.getElementById("ov-genreOtherWrap").classList.toggle("d-none", e.target.value !== "other");
+  });
+  document.getElementById("ov-genreOther").addEventListener("input", function(e){ data.overview.genreOther = e.target.value; });
+  document.getElementById("ov-targetWordCount").addEventListener("input", function(e){
+    data.overview.targetWordCount = num(e.target.value);
+    updateManuscriptProgress();
+  });
+  document.getElementById("ov-povStyle").addEventListener("input", function(e){
+    data.overview.povStyle = e.target.value;
+    document.getElementById("ov-povOtherWrap").classList.toggle("d-none", e.target.value !== "other");
+  });
+  document.getElementById("ov-povOther").addEventListener("input", function(e){ data.overview.povOther = e.target.value; });
+  document.getElementById("ov-tense").addEventListener("input", function(e){ data.overview.tense = e.target.value; });
+  document.getElementById("ov-audience").addEventListener("input", function(e){
+    data.overview.audience = e.target.value;
+    document.getElementById("ov-audienceOtherWrap").classList.toggle("d-none", e.target.value !== "other");
+  });
+  document.getElementById("ov-audienceOther").addEventListener("input", function(e){ data.overview.audienceOther = e.target.value; });
+  document.getElementById("ov-logline").addEventListener("input", function(e){ data.overview.logline = e.target.value; });
+  document.getElementById("ov-themes").addEventListener("input", function(e){ data.overview.themes = e.target.value; });
+}
+
+/* =========================================================
+   JS — Render: Character Bible
+   ========================================================= */
+function traitBadgesHtml(char){
+  return char.traits.map(function(t, i){
+    return '<span class="trait-badge">' + esc(t) + ' <span class="remove-trait" data-action="remove-trait" data-index="' + i + '">×</span></span>';
+  }).join(" ");
+}
+function relationshipsHtml(char){
+  return char.relationships.map(function(rel){
+    return '<div class="row g-2 align-items-center mb-2" data-rel-id="' + rel.id + '">' +
+      '<div class="col-6"><select class="form-select form-select-sm char-ref-select" data-field="relCharId">' + characterOptionsHtml(rel.charId, char.id) + "</select></div>" +
+      '<div class="col-5"><input type="text" class="form-control form-control-sm" data-field="relType" placeholder="e.g. rival, mentor, sister" value="' + esc(rel.type) + '"></div>' +
+      '<div class="col-1"><button class="btn btn-sm btn-outline-danger" data-action="remove-relationship">×</button></div>' +
+    "</div>";
+  }).join("");
+}
+function characterCardHtml(char, index, total){
+  var open = isOpen("characters", char.id);
+  var roleLabel = char.role || "Protagonist";
+  return "" +
+  '<div class="card panel-card mb-3" data-id="' + char.id + '">' +
+    '<div class="card-header" data-toggle-panel="characters">' +
+      '<div class="d-flex align-items-center gap-2 flex-wrap">' +
+        '<span class="chevron">' + (open ? "▾" : "▸") + "</span>" +
+        '<strong class="char-name-display">' + (esc(char.name) || "Unnamed Character") + "</strong>" +
+        '<span class="badge role-badge-' + roleLabel + ' char-role-badge">' + esc(roleLabel) + "</span>" +
+      "</div>" +
+      '<div class="d-flex align-items-center gap-1 header-actions" data-no-toggle>' +
+        '<button class="btn btn-sm btn-outline-secondary" data-action="move-up" ' + (index === 0 ? "disabled" : "") + ">▲</button>" +
+        '<button class="btn btn-sm btn-outline-secondary" data-action="move-down" ' + (index === total - 1 ? "disabled" : "") + ">▼</button>" +
+        '<button class="btn btn-sm btn-outline-danger" data-action="remove-character">Remove</button>' +
+      "</div>" +
+    "</div>" +
+    '<div class="panel-collapse' + (open ? " show" : "") + '">' +
+      '<div class="card-body">' +
+        '<div class="row g-3">' +
+          '<div class="col-md-5"><label class="form-label">Name</label><input type="text" class="form-control" data-field="name" value="' + esc(char.name) + '"></div>' +
+          '<div class="col-md-4"><label class="form-label">Role</label><select class="form-select" data-field="role">' +
+            ROLES.map(function(r){ return '<option value="' + r + '"' + (r === char.role ? " selected" : "") + '>' + r + "</option>"; }).join("") +
+          "</select></div>" +
+          '<div class="col-md-3"><label class="form-label">Age</label><input type="text" class="form-control" data-field="age" value="' + esc(char.age) + '"></div>' +
+          '<div class="col-12"><label class="form-label">Physical Description</label><textarea class="form-control text-longform" rows="2" data-field="description">' + esc(char.description) + "</textarea></div>" +
+          '<div class="col-12">' +
+            '<label class="form-label">Personality Traits</label>' +
+            '<div class="mb-2 traits-badges" data-traits-for="' + char.id + '">' + traitBadgesHtml(char) + "</div>" +
+            '<div class="input-group input-group-sm" style="max-width:320px;">' +
+              '<input type="text" class="form-control" data-field="traitDraft" placeholder="Type a trait, press Enter">' +
+              '<button class="btn btn-outline-secondary" data-action="add-trait" type="button">Add</button>' +
+            "</div>" +
+          "</div>" +
+          '<div class="col-12"><label class="form-label">Backstory</label><textarea class="form-control text-longform" rows="3" data-field="backstory">' + esc(char.backstory) + "</textarea></div>" +
+          '<div class="col-md-6"><label class="form-label">Motivation / Goal</label><textarea class="form-control text-longform" rows="2" data-field="motivation">' + esc(char.motivation) + "</textarea></div>" +
+          '<div class="col-md-6"><label class="form-label">Internal Conflict</label><textarea class="form-control text-longform" rows="2" data-field="internalConflict">' + esc(char.internalConflict) + "</textarea></div>" +
+          '<div class="col-md-12"><label class="form-label">External Conflict</label><textarea class="form-control text-longform" rows="2" data-field="externalConflict">' + esc(char.externalConflict) + "</textarea></div>" +
+          '<div class="col-md-6"><label class="form-label">Character Arc — Start State</label><textarea class="form-control text-longform" rows="2" data-field="arcStart">' + esc(char.arcStart) + "</textarea></div>" +
+          '<div class="col-md-6"><label class="form-label">Character Arc — End State</label><textarea class="form-control text-longform" rows="2" data-field="arcEnd">' + esc(char.arcEnd) + "</textarea></div>" +
+          '<div class="col-12">' +
+            '<label class="form-label d-block">Relationships</label>' +
+            '<div class="relationships-list">' + relationshipsHtml(char) + "</div>" +
+            '<button class="btn btn-sm btn-outline-secondary" data-action="add-relationship" type="button">+ Add Relationship</button>' +
+          "</div>" +
+        "</div>" +
+      "</div>" +
+    "</div>" +
+  "</div>";
+}
+function renderCharacters(){
+  var list = document.getElementById("characterList");
+  list.innerHTML = data.characters.map(function(c, i){ return characterCardHtml(c, i, data.characters.length); }).join("");
+  document.getElementById("characterEmptyMsg").classList.toggle("d-none", data.characters.length > 0);
+  refreshMsPovSelect();
+}
+function renderTraitBadges(char){
+  var el = document.querySelector('.traits-badges[data-traits-for="' + char.id + '"]');
+  if (el) el.innerHTML = traitBadgesHtml(char);
+}
+function bindCharacterEvents(){
+  document.getElementById("addCharacterBtn").addEventListener("click", function(){
+    var c = { id: uid("char"), name:"", role:"Protagonist", age:"", description:"", traits:[], backstory:"", motivation:"", internalConflict:"", externalConflict:"", arcStart:"", arcEnd:"", relationships:[] };
+    data.characters.push(c);
+    setOpen("characters", c.id, true);
+    renderCharacters();
+  });
+  var list = document.getElementById("characterList");
+  list.addEventListener("click", function(e){
+    var toggleEl = e.target.closest('[data-toggle-panel="characters"]');
+    if (toggleEl && !e.target.closest("[data-no-toggle]")) {
+      var cardEl = toggleEl.closest("[data-id]");
+      togglePanelState("characters", cardEl.dataset.id);
+      renderCharacters();
+      return;
+    }
+    var actionEl = e.target.closest("[data-action]");
+    if (!actionEl) return;
+    var card = actionEl.closest("[data-id]");
+    var id = card.dataset.id;
+    var char = data.characters.find(function(c){ return c.id === id; });
+    if (!char) return;
+    var action = actionEl.dataset.action;
+    if (action === "remove-character") {
+      if (!confirm('Remove character "' + (char.name || "Unnamed Character") + '"? This will also remove references to them in relationships and the manuscript POV field.')) return;
+      data.characters = data.characters.filter(function(c){ return c.id !== id; });
+      delete data.panels.characters[id];
+      data.characters.forEach(function(c){ c.relationships = c.relationships.filter(function(r){ return r.charId !== id; }); });
+      data.chapters.forEach(function(ch){ if (ch.povCharId === id) ch.povCharId = ""; });
+      renderCharacters();
+    } else if (action === "move-up") {
+      moveItem(data.characters, id, -1); renderCharacters();
+    } else if (action === "move-down") {
+      moveItem(data.characters, id, 1); renderCharacters();
+    } else if (action === "add-relationship") {
+      char.relationships.push({ id: uid("rel"), charId:"", type:"" });
+      renderCharacters();
+      setOpen("characters", id, true);
+    } else if (action === "remove-relationship") {
+      var relRow = actionEl.closest("[data-rel-id]");
+      char.relationships = char.relationships.filter(function(r){ return r.id !== relRow.dataset.relId; });
+      renderCharacters();
+    } else if (action === "remove-trait") {
+      var idx = Number(actionEl.dataset.index);
+      char.traits.splice(idx, 1);
+      renderTraitBadges(char);
+    } else if (action === "add-trait") {
+      var input = card.querySelector('[data-field="traitDraft"]');
+      var val = input.value.trim();
+      if (val) { char.traits.push(val); input.value = ""; renderTraitBadges(char); input.focus(); }
+    }
+  });
+  list.addEventListener("keydown", function(e){
+    if (e.target.matches('[data-field="traitDraft"]') && e.key === "Enter") {
+      e.preventDefault();
+      var card = e.target.closest("[data-id]");
+      var char = data.characters.find(function(c){ return c.id === card.dataset.id; });
+      var val = e.target.value.trim();
+      if (val) { char.traits.push(val); e.target.value = ""; renderTraitBadges(char); e.target.focus(); }
+    }
+  });
+  list.addEventListener("input", function(e){
+    var field = e.target.dataset.field;
+    if (!field) return;
+    var card = e.target.closest("[data-id]");
+    if (!card) return;
+    var char = data.characters.find(function(c){ return c.id === card.dataset.id; });
+    if (!char) return;
+    var relRow = e.target.closest("[data-rel-id]");
+    if (relRow) {
+      var rel = char.relationships.find(function(r){ return r.id === relRow.dataset.relId; });
+      if (rel) {
+        if (field === "relCharId") rel.charId = e.target.value;
+        if (field === "relType") rel.type = e.target.value;
+      }
+      return;
+    }
+    if (field === "traitDraft") return;
+    char[field] = e.target.value;
+    if (field === "name") {
+      var nameDisplay = card.querySelector(".char-name-display");
+      if (nameDisplay) nameDisplay.textContent = e.target.value || "Unnamed Character";
+      refreshCharacterOptionLabels(char.id, e.target.value);
+    }
+    if (field === "role") {
+      var badge = card.querySelector(".char-role-badge");
+      if (badge) {
+        badge.textContent = e.target.value;
+        badge.className = "badge role-badge-" + e.target.value + " char-role-badge";
+      }
+    }
+  });
+}
+
+/* =========================================================
+   JS — Render: Plot Structure
+   ========================================================= */
+function beatCardHtml(beat, isFreeform, index, total){
+  var labelHtml = isFreeform
+    ? '<input type="text" class="form-control form-control-sm mb-2" data-field="label" value="' + esc(beat.label) + '" style="max-width:320px;">'
+    : '<h4 class="h6 mb-2">' + esc(beat.label) + "</h4>";
+  var freeformControls = isFreeform
+    ? '<div class="d-flex gap-1">' +
+        '<button class="btn btn-sm btn-outline-secondary" data-action="move-beat-up" ' + (index === 0 ? "disabled" : "") + ">▲</button>" +
+        '<button class="btn btn-sm btn-outline-secondary" data-action="move-beat-down" ' + (index === total - 1 ? "disabled" : "") + ">▼</button>" +
+        '<button class="btn btn-sm btn-outline-danger" data-action="remove-beat">Remove</button>' +
+      "</div>"
+    : "";
+  return '<div class="mb-3 pb-2 border-bottom" data-beat-id="' + beat.id + '">' +
+    '<div class="d-flex justify-content-between align-items-start flex-wrap gap-2">' + labelHtml + freeformControls + "</div>" +
+    '<textarea class="form-control text-longform" rows="2" data-field="text" placeholder="Describe what happens here...">' + esc(beat.text) + "</textarea>" +
+    '<div class="mt-1"><label class="form-label small mb-0">Linked Chapter</label><select class="form-select form-select-sm beat-chapter-select" data-field="chapterId" style="max-width:260px;">' + chapterOptionsHtml(beat.chapterId) + "</select></div>" +
+  "</div>";
+}
+function renderPlotBeats(){
+  var container = document.getElementById("plotBeatsContainer");
+  var isFreeform = data.plot.template === "freeform";
+  container.innerHTML = data.plot.beats.map(function(b, i){ return beatCardHtml(b, isFreeform, i, data.plot.beats.length); }).join("");
+  document.getElementById("plotEmptyMsg").classList.toggle("d-none", data.plot.beats.length > 0 || !!data.plot.template);
+  document.getElementById("addBeatWrap").style.display = isFreeform ? "block" : "none";
+}
+function renderOutlinePreview(){
+  var el = document.getElementById("outlinePreview");
+  if (!data.plot.template || data.plot.beats.length === 0) {
+    el.innerHTML = '<p class="text-muted mb-0">No plot structure selected yet.</p>';
+    return;
+  }
+  el.innerHTML = data.plot.beats.map(function(b){
+    var linkedChapter = b.chapterId ? data.chapters.find(function(c){ return c.id === b.chapterId; }) : null;
+    return '<div class="mb-2"><strong>' + esc(b.label || "Untitled Beat") + ":</strong> " +
+      (b.text && b.text.trim() ? nl2br(b.text) : '<em class="text-muted">Not yet written</em>') +
+      (linkedChapter ? ' <span class="badge bg-secondary">' + esc(chapterLabel(linkedChapter)) + "</span>" : "") +
+    "</div>";
+  }).join("");
+}
+function applyPlotTemplate(key){
+  data.plot.template = key;
+  if (!key) { data.plot.beats = []; }
+  else if (key === "freeform") { data.plot.beats = []; }
+  else { data.plot.beats = PLOT_TEMPLATES[key].beats.map(function(label){ return { id: uid("beat"), label: label, text:"", chapterId:"" }; }); }
+  renderPlotBeats();
+  renderOutlinePreview();
+}
+function bindPlotEvents(){
+  var select = document.getElementById("plotTemplateSelect");
+  select.addEventListener("change", function(e){
+    var newTemplate = e.target.value;
+    var hasContent = data.plot.beats.some(function(b){ return b.text && b.text.trim(); });
+    if (hasContent && !confirm("Switching structure templates will replace the current beat set. Existing beat text will be lost. Continue?")) {
+      select.value = data.plot.template;
+      return;
+    }
+    applyPlotTemplate(newTemplate);
+  });
+  document.getElementById("addBeatBtn").addEventListener("click", function(){
+    data.plot.beats.push({ id: uid("beat"), label:"New Beat", text:"", chapterId:"" });
+    renderPlotBeats();
+    renderOutlinePreview();
+  });
+  var container = document.getElementById("plotBeatsContainer");
+  container.addEventListener("click", function(e){
+    var actionEl = e.target.closest("[data-action]");
+    if (!actionEl) return;
+    var row = actionEl.closest("[data-beat-id]");
+    var beatId = row.dataset.beatId;
+    var action = actionEl.dataset.action;
+    if (action === "remove-beat") { data.plot.beats = data.plot.beats.filter(function(b){ return b.id !== beatId; }); }
+    else if (action === "move-beat-up") { moveItem(data.plot.beats, beatId, -1); }
+    else if (action === "move-beat-down") { moveItem(data.plot.beats, beatId, 1); }
+    renderPlotBeats();
+    renderOutlinePreview();
+  });
+  container.addEventListener("input", function(e){
+    var field = e.target.dataset.field;
+    if (!field) return;
+    var row = e.target.closest("[data-beat-id]");
+    var beat = data.plot.beats.find(function(b){ return b.id === row.dataset.beatId; });
+    if (!beat) return;
+    beat[field] = e.target.value;
+    renderOutlinePreview();
+  });
+}
+
+/* =========================================================
+   JS — Render: Manuscript (chapter sidebar)
+   ========================================================= */
+function chapterSidebarItemHtml(chapter, index, total){
+  var active = chapter.id === data.currentChapterId;
+  var goal = num(chapter.wordGoal), actual = num(chapter.wordActual);
+  return '<div class="chapter-sidebar-item' + (active ? " active" : "") + '" draggable="true" data-id="' + chapter.id + '">' +
+    '<div class="d-flex justify-content-between align-items-start">' +
+      '<div class="csi-title">' + esc(chapterLabel(chapter)) + "</div>" +
+      '<div class="d-flex gap-1" data-no-select>' +
+        '<button class="btn btn-sm btn-link p-0" data-action="move-up" title="Move up" ' + (index === 0 ? "disabled" : "") + ">▲</button>" +
+        '<button class="btn btn-sm btn-link p-0" data-action="move-down" title="Move down" ' + (index === total - 1 ? "disabled" : "") + ">▼</button>" +
+        '<button class="btn btn-sm btn-link p-0 text-danger" data-action="remove-chapter" title="Remove">×</button>' +
+      "</div>" +
+    "</div>" +
+    '<div class="csi-meta"><span class="badge status-badge-' + statusClass(chapter.status) + '">' + esc(chapter.status) + "</span><span>" + actual.toLocaleString() + (goal ? " / " + goal.toLocaleString() : "") + " words</span></div>" +
+  "</div>";
+}
+function renderChapterSidebar(){
+  var list = document.getElementById("chapterSidebarList");
+  list.innerHTML = data.chapters.map(function(c, i){ return chapterSidebarItemHtml(c, i, data.chapters.length); }).join("");
+  document.getElementById("chapterEmptyMsg").classList.toggle("d-none", data.chapters.length > 0);
+}
+function updateSidebarItemTitle(chapter){
+  var el = document.querySelector('.chapter-sidebar-item[data-id="' + chapter.id + '"] .csi-title');
+  if (el) el.textContent = chapterLabel(chapter);
+}
+function updateSidebarItemMeta(chapter){
+  var el = document.querySelector('.chapter-sidebar-item[data-id="' + chapter.id + '"] .csi-meta');
+  if (!el) return;
+  var goal = num(chapter.wordGoal), actual = num(chapter.wordActual);
+  el.innerHTML = '<span class="badge status-badge-' + statusClass(chapter.status) + '">' + esc(chapter.status) + "</span><span>" + actual.toLocaleString() + (goal ? " / " + goal.toLocaleString() : "") + " words</span>";
+}
+
+function bindChapterSidebarEvents(){
+  document.getElementById("addChapterBtn").addEventListener("click", function(){
+    var c = { id: uid("chap"), number: data.chapters.length + 1, title:"", povCharId:"", content:"", wordGoal:0, wordActual:0, status:"Not Started" };
+    data.chapters.push(c);
+    data.currentChapterId = c.id;
+    data.prefs.manuscriptView = "write";
+    document.querySelectorAll(".ms-view-btn").forEach(function(b){ b.classList.toggle("active", b.dataset.view === "write"); });
+    renderChapterSidebar();
+    refreshManuscriptMain();
+    refreshPlotChapterSelects();
+    updateManuscriptProgress();
+  });
+
+  var list = document.getElementById("chapterSidebarList");
+  list.addEventListener("click", function(e){
+    var actionEl = e.target.closest("[data-action]");
+    var item = e.target.closest(".chapter-sidebar-item");
+    if (!item) return;
+    var id = item.dataset.id;
+    if (actionEl) {
+      var action = actionEl.dataset.action;
+      var ch = data.chapters.find(function(c){ return c.id === id; });
+      if (action === "remove-chapter") {
+        if (!confirm('Remove chapter "' + (ch.title || ("#" + ch.number)) + '"? This cannot be undone.')) return;
+        data.chapters = data.chapters.filter(function(c){ return c.id !== id; });
+        data.plot.beats.forEach(function(b){ if (b.chapterId === id) b.chapterId = ""; });
+        if (data.currentChapterId === id) { data.currentChapterId = data.chapters.length ? data.chapters[0].id : null; }
+        renderChapterSidebar();
+        refreshManuscriptMain();
+        refreshPlotChapterSelects();
+        updateManuscriptProgress();
+      } else if (action === "move-up") { moveItem(data.chapters, id, -1); renderChapterSidebar(); }
+      else if (action === "move-down") { moveItem(data.chapters, id, 1); renderChapterSidebar(); }
+      return;
+    }
+    selectChapter(id);
+  });
+  list.addEventListener("dragstart", function(e){
+    var item = e.target.closest(".chapter-sidebar-item");
+    if (!item) return;
+    e.dataTransfer.setData("text/plain", item.dataset.id);
+    e.dataTransfer.effectAllowed = "move";
+  });
+  list.addEventListener("dragover", function(e){ e.preventDefault(); e.dataTransfer.dropEffect = "move"; });
+  list.addEventListener("drop", function(e){
+    e.preventDefault();
+    var draggedId = e.dataTransfer.getData("text/plain");
+    var targetItem = e.target.closest(".chapter-sidebar-item");
+    if (!targetItem || targetItem.dataset.id === draggedId) return;
+    var fromIdx = data.chapters.findIndex(function(c){ return c.id === draggedId; });
+    var toIdx = data.chapters.findIndex(function(c){ return c.id === targetItem.dataset.id; });
+    if (fromIdx < 0 || toIdx < 0) return;
+    var moved = data.chapters.splice(fromIdx, 1)[0];
+    data.chapters.splice(toIdx, 0, moved);
+    renderChapterSidebar();
+  });
+
+  document.getElementById("toggleSidebarBtn").addEventListener("click", function(){
+    data.panels.sidebarCollapsed = !data.panels.sidebarCollapsed;
+    document.getElementById("manuscriptShell").classList.toggle("sidebar-hidden", data.panels.sidebarCollapsed);
+  });
+}
+
+function selectChapter(id){
+  data.currentChapterId = id;
+  renderChapterSidebar();
+  refreshManuscriptMain();
+}
+
+/* =========================================================
+   JS — Manuscript main pane (write / preview / full)
+   ========================================================= */
+function loadChapterIntoEditor(chapter){
+  chapter = chapter || getCurrentChapter();
+  var editor = document.getElementById("manuscriptEditor");
+  if (!chapter) { editor.innerHTML = ""; return; }
+  editor.innerHTML = (chapter.content && chapter.content.trim()) ? chapter.content : "<p><br></p>";
+}
+function fillToolbarForChapter(chapter){
+  document.getElementById("msTitleInput").value = chapter.title || "";
+  document.getElementById("msNumberInput").value = chapter.number;
+  document.getElementById("msPovSelect").innerHTML = characterOptionsHtml(chapter.povCharId);
+  document.getElementById("msGoalInput").value = num(chapter.wordGoal);
+  document.getElementById("msStatusSelect").innerHTML = STATUSES.map(function(s){ return '<option value="' + s + '"' + (s === chapter.status ? " selected" : "") + '>' + s + "</option>"; }).join("");
+  updateToolbarProgress(chapter);
+}
+function updateToolbarProgress(chapter){
+  var goal = num(chapter.wordGoal), actual = num(chapter.wordActual);
+  var pct = goal > 0 ? Math.min(100, (actual / goal) * 100) : 0;
+  var bar = document.getElementById("msProgressBar"); if (bar) bar.style.width = pct + "%";
+  var text = document.getElementById("msProgressText"); if (text) text.textContent = actual.toLocaleString() + " / " + goal.toLocaleString() + " words";
+  var statusSel = document.getElementById("msStatusSelect"); if (statusSel) statusSel.value = chapter.status;
+  if (data.prefs.focusMode) updateFocusWordCount(chapter);
+}
+function updateFocusWordCount(chapter){
+  var el = document.getElementById("focusWordCount");
+  if (el) el.textContent = num(chapter.wordActual).toLocaleString() + " words";
+}
+function renderChapterPreview(chapter){
+  document.getElementById("chapterPreviewContent").innerHTML =
+    '<h2 class="chapter-heading">' + esc(chapterLabel(chapter)) + "</h2>" +
+    (chapter.content && chapter.content.trim() ? chapter.content : '<p class="text-muted"><em>No content yet.</em></p>');
+}
+function renderFullManuscriptView(){
+  var toc = '<div class="book-page toc-page"><h2 class="chapter-heading">Table of Contents</h2><ul class="list-unstyled">' +
+    data.chapters.map(function(c){ return '<li class="mb-1"><a href="#" data-jump="' + c.id + '">' + esc(chapterLabel(c)) + "</a></li>"; }).join("") +
+  "</ul></div>";
+  var chaptersHtml = data.chapters.map(function(c){
+    return '<div class="book-page" id="full-chapter-' + c.id + '"><h2 class="chapter-heading">' + esc(chapterLabel(c)) + "</h2>" +
+      (c.content && c.content.trim() ? c.content : '<p class="text-muted"><em>No content yet.</em></p>') + "</div>";
+  }).join("");
+  document.getElementById("fullManuscriptContent").innerHTML = toc + chaptersHtml;
+}
+function refreshManuscriptMain(){
+  var chapter = getCurrentChapter();
+  var hasChapter = !!chapter;
+  var view = data.prefs.manuscriptView;
+  document.getElementById("noChapterMsg").classList.toggle("d-none", hasChapter || view === "full");
+  document.getElementById("msToolbar").classList.toggle("d-none", !hasChapter);
+  document.getElementById("msEditorWrap").classList.add("d-none");
+  document.getElementById("msPreviewWrap").classList.add("d-none");
+  document.getElementById("msFullWrap").classList.add("d-none");
+  if (view === "full") {
+    document.getElementById("msFullWrap").classList.remove("d-none");
+    renderFullManuscriptView();
+    if (hasChapter) fillToolbarForChapter(chapter);
+    return;
+  }
+  if (!hasChapter) return;
+  fillToolbarForChapter(chapter);
+  if (view === "preview") {
+    document.getElementById("msPreviewWrap").classList.remove("d-none");
+    renderChapterPreview(chapter);
+  } else {
+    document.getElementById("msEditorWrap").classList.remove("d-none");
+    loadChapterIntoEditor(chapter);
+  }
+}
+
+/* =========================================================
+   JS — Live word count (debounced) + auto-status
+   ========================================================= */
+function syncEditorContent(){
+  var chapter = getCurrentChapter();
+  if (!chapter) return;
+  var editor = document.getElementById("manuscriptEditor");
+  chapter.content = editor.innerHTML;
+  recomputeWordCount(chapter);
+}
+function recomputeWordCount(chapter){
+  var words = wordsFromHtml(chapter.content);
+  chapter.wordActual = words;
+  if (words > 0 && chapter.status === "Not Started") chapter.status = "Drafting";
+  updateToolbarProgress(chapter);
+  updateSidebarItemMeta(chapter);
+  updateManuscriptProgress();
+  checkMilestones();
+}
+function saveSelectionRangeFn(){
+  var editor = document.getElementById("manuscriptEditor");
+  var sel = window.getSelection();
+  if (sel.rangeCount > 0 && editor.contains(sel.anchorNode)) savedRange = sel.getRangeAt(0).cloneRange();
+}
+function insertAtSavedRange(text){
+  var editor = document.getElementById("manuscriptEditor");
+  editor.focus();
+  var sel = window.getSelection();
+  sel.removeAllRanges();
+  if (savedRange && editor.contains(savedRange.startContainer)) {
+    try { sel.addRange(savedRange); } catch (e) {}
+  }
+  if (sel.rangeCount === 0) {
+    var endRange = document.createRange();
+    endRange.selectNodeContents(editor);
+    endRange.collapse(false);
+    sel.addRange(endRange);
+  }
+  document.execCommand("insertText", false, text);
+  syncEditorContent();
+  saveSelectionRangeFn();
+}
+
+function insertSceneBreak(){
+  var editor = document.getElementById("manuscriptEditor");
+  editor.focus();
+  var sel = window.getSelection();
+  var sceneP = document.createElement("p");
+  sceneP.className = "scene-break";
+  sceneP.style.textAlign = "center";
+  sceneP.style.textIndent = "0";
+  sceneP.style.letterSpacing = ".3em";
+  sceneP.style.color = "#8a8078";
+  sceneP.style.margin = "1.5em 0";
+  sceneP.textContent = "* * *";
+  var newP = document.createElement("p");
+  newP.innerHTML = "<br>";
+
+  var anchorBlock = null;
+  if (sel.rangeCount > 0) {
+    var node = sel.getRangeAt(0).endContainer;
+    while (node && node !== editor && node.parentNode !== editor) node = node.parentNode;
+    if (node && node !== editor && editor.contains(node)) anchorBlock = node;
+  }
+  if (anchorBlock) {
+    anchorBlock.parentNode.insertBefore(sceneP, anchorBlock.nextSibling);
+    sceneP.parentNode.insertBefore(newP, sceneP.nextSibling);
+  } else {
+    editor.appendChild(sceneP);
+    editor.appendChild(newP);
+  }
+  var newRange = document.createRange();
+  newRange.setStart(newP, 0);
+  newRange.collapse(true);
+  sel.removeAllRanges();
+  sel.addRange(newRange);
+  syncEditorContent();
+  saveSelectionRangeFn();
+}
+
+function bindManuscriptEditorEvents(){
+  try { document.execCommand("defaultParagraphSeparator", false, "p"); } catch (e) {}
+  var editor = document.getElementById("manuscriptEditor");
+
+  editor.addEventListener("input", function(){
+    var chapter = getCurrentChapter();
+    if (!chapter) return;
+    chapter.content = editor.innerHTML;
+    saveSelectionRangeFn();
+    clearTimeout(wordCountDebounceTimer);
+    wordCountDebounceTimer = setTimeout(function(){ recomputeWordCount(chapter); }, 200);
+  });
+  editor.addEventListener("keyup", saveSelectionRangeFn);
+  editor.addEventListener("mouseup", saveSelectionRangeFn);
+  editor.addEventListener("focus", saveSelectionRangeFn);
+
+  ["boldBtn","italicBtn","sceneBreakBtn","quickInsertBtn"].forEach(function(id){
+    document.getElementById(id).addEventListener("mousedown", function(e){ e.preventDefault(); });
+  });
+  document.getElementById("boldBtn").addEventListener("click", function(){ document.execCommand("bold"); syncEditorContent(); });
+  document.getElementById("italicBtn").addEventListener("click", function(){ document.execCommand("italic"); syncEditorContent(); });
+  document.getElementById("sceneBreakBtn").addEventListener("click", function(){ insertSceneBreak(); });
+
+  document.getElementById("msTitleInput").addEventListener("input", function(e){
+    var chapter = getCurrentChapter(); if (!chapter) return;
+    chapter.title = e.target.value;
+    updateSidebarItemTitle(chapter);
+    refreshChapterOptionLabels(chapter.id, chapterLabel(chapter));
+  });
+  document.getElementById("msNumberInput").addEventListener("input", function(e){
+    var chapter = getCurrentChapter(); if (!chapter) return;
+    chapter.number = e.target.value;
+    updateSidebarItemTitle(chapter);
+    refreshChapterOptionLabels(chapter.id, chapterLabel(chapter));
+  });
+  document.getElementById("msPovSelect").addEventListener("input", function(e){
+    var chapter = getCurrentChapter(); if (chapter) chapter.povCharId = e.target.value;
+  });
+  document.getElementById("msGoalInput").addEventListener("input", function(e){
+    var chapter = getCurrentChapter(); if (!chapter) return;
+    chapter.wordGoal = num(e.target.value);
+    updateToolbarProgress(chapter);
+    updateSidebarItemMeta(chapter);
+  });
+  document.getElementById("msStatusSelect").addEventListener("input", function(e){
+    var chapter = getCurrentChapter(); if (!chapter) return;
+    chapter.status = e.target.value;
+    updateToolbarProgress(chapter);
+    updateSidebarItemMeta(chapter);
+  });
+
+  document.querySelectorAll(".ms-view-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      document.querySelectorAll(".ms-view-btn").forEach(function(b){ b.classList.remove("active"); });
+      btn.classList.add("active");
+      data.prefs.manuscriptView = btn.dataset.view;
+      refreshManuscriptMain();
+    });
+  });
+  document.getElementById("fullManuscriptContent").addEventListener("click", function(e){
+    var a = e.target.closest("[data-jump]");
+    if (!a) return;
+    e.preventDefault();
+    var target = document.getElementById("full-chapter-" + a.dataset.jump);
+    if (target) target.scrollIntoView({ behavior:"smooth", block:"start" });
+  });
+
+  document.getElementById("focusModeBtn").addEventListener("click", function(){ setFocusMode(true); });
+  document.getElementById("exitFocusBtn").addEventListener("click", function(){ setFocusMode(false); });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape" && data.prefs.focusMode) setFocusMode(false); });
+
+  document.getElementById("fontFamilySelect").addEventListener("change", function(e){ data.prefs.fontFamily = e.target.value; applyEditorFont(); });
+  document.getElementById("fontSizeDown").addEventListener("click", function(){ data.prefs.fontSize = Math.max(12, num(data.prefs.fontSize) - 1); applyEditorFont(); });
+  document.getElementById("fontSizeUp").addEventListener("click", function(){ data.prefs.fontSize = Math.min(32, num(data.prefs.fontSize) + 1); applyEditorFont(); });
+
+  bindQuickInsert();
+}
+
+function setFocusMode(on){
+  var chapter = getCurrentChapter();
+  var editor = document.getElementById("manuscriptEditor");
+  if (on) {
+    if (!chapter) return;
+    loadChapterIntoEditor(chapter);
+    document.getElementById("focusChapterTitle").textContent = chapterLabel(chapter);
+    document.getElementById("focusEditorMount").appendChild(editor);
+    document.getElementById("focusOverlay").classList.remove("d-none");
+    document.body.classList.add("focus-active");
+    data.prefs.focusMode = true;
+    updateFocusWordCount(chapter);
+  } else {
+    document.getElementById("editorMount").appendChild(editor);
+    document.getElementById("focusOverlay").classList.add("d-none");
+    document.body.classList.remove("focus-active");
+    data.prefs.focusMode = false;
+    refreshManuscriptMain();
+  }
+  editor.focus();
+}
+
+function applyEditorFont(){
+  var fam = { serif:'Georgia, "Iowan Old Style", "Palatino Linotype", serif', sans:'-apple-system, "Segoe UI", Roboto, sans-serif', mono:'"Courier New", Consolas, monospace' }[data.prefs.fontFamily] || "Georgia, serif";
+  document.documentElement.style.setProperty("--editor-font-family", fam);
+  document.documentElement.style.setProperty("--editor-font-size", data.prefs.fontSize + "px");
+  document.getElementById("fontSizeLabel").textContent = data.prefs.fontSize + "px";
+  var famSel = document.getElementById("fontFamilySelect");
+  if (famSel) famSel.value = data.prefs.fontFamily;
+}
+
+/* =========================================================
+   JS — Quick-insert reference popup
+   ========================================================= */
+function renderQuickInsertResults(query){
+  query = query.trim().toLowerCase();
+  var items = [];
+  data.characters.forEach(function(c){
+    if (!query || (c.name || "").toLowerCase().indexOf(query) > -1) items.push({ type:"Character", label:c.name || "(unnamed)" });
+  });
+  data.worldCategories.forEach(function(cat){
+    cat.entries.forEach(function(en){
+      var snippet = (en.text || "").slice(0, 40);
+      if (!query || snippet.toLowerCase().indexOf(query) > -1 || (cat.name || "").toLowerCase().indexOf(query) > -1) {
+        items.push({ type: cat.name || "Note", label: snippet || "(empty note)" });
+      }
+    });
+  });
+  var container = document.getElementById("quickInsertResults");
+  if (items.length === 0) { container.innerHTML = '<p class="text-muted small mb-0">No matches.</p>'; return; }
+  container.innerHTML = items.slice(0, 20).map(function(it, i){
+    return '<div class="quick-insert-result-item" data-index="' + i + '"><span class="text-muted small">' + esc(it.type) + ":</span> " + esc(it.label) + "</div>";
+  }).join("");
+  container._items = items;
+}
+function bindQuickInsert(){
+  var btn = document.getElementById("quickInsertBtn");
+  var popup = document.getElementById("quickInsertPopup");
+  btn.addEventListener("click", function(){
+    if (!popup.classList.contains("d-none")) { popup.classList.add("d-none"); return; }
+    var rect = btn.getBoundingClientRect();
+    popup.style.top = (rect.bottom + window.scrollY + 6) + "px";
+    popup.style.left = (rect.left + window.scrollX) + "px";
+    popup.classList.remove("d-none");
+    document.getElementById("quickInsertSearch").value = "";
+    renderQuickInsertResults("");
+    document.getElementById("quickInsertSearch").focus();
+  });
+  document.getElementById("quickInsertSearch").addEventListener("input", function(e){ renderQuickInsertResults(e.target.value); });
+  document.getElementById("quickInsertResults").addEventListener("click", function(e){
+    var item = e.target.closest(".quick-insert-result-item");
+    if (!item) return;
+    var idx = Number(item.dataset.index);
+    var picked = this._items && this._items[idx];
+    if (!picked) return;
+    insertAtSavedRange("[" + picked.label + "]");
+    popup.classList.add("d-none");
+  });
+  document.addEventListener("click", function(e){
+    if (popup.classList.contains("d-none")) return;
+    if (!e.target.closest("#quickInsertPopup") && !e.target.closest("#quickInsertBtn")) popup.classList.add("d-none");
+  });
+}
+
+/* =========================================================
+   JS — Manuscript-wide progress (header + tab mirror)
+   ========================================================= */
+function setBarWidthText(barId, textId, pct, actual, target, withPct){
+  var bar = document.getElementById(barId);
+  var text = document.getElementById(textId);
+  if (bar) bar.style.width = pct + "%";
+  if (text) text.textContent = actual.toLocaleString() + " / " + target.toLocaleString() + " words" + (withPct ? " (" + pct.toFixed(0) + "%)" : "");
+}
+function updateManuscriptProgress(){
+  var totalActual = totalManuscriptWords();
+  var target = num(data.overview.targetWordCount);
+  var pct = target > 0 ? Math.min(100, (totalActual / target) * 100) : 0;
+  setBarWidthText("headerProgressBar", "headerProgressText", pct, totalActual, target, true);
+  setBarWidthText("msOverallProgressBar", "msOverallProgressText", pct, totalActual, target, false);
+}
+
+/* =========================================================
+   JS — Render: World-Building Notes
+   ========================================================= */
+function worldEntryHtml(entry, index, total){
+  return '<div class="d-flex gap-2 align-items-start mb-2" data-entry-id="' + entry.id + '">' +
+    '<textarea class="form-control text-longform" rows="2" data-field="entryText">' + esc(entry.text) + "</textarea>" +
+    '<div class="d-flex flex-column gap-1">' +
+      '<button class="btn btn-sm btn-outline-secondary" data-action="move-entry-up" ' + (index === 0 ? "disabled" : "") + ">▲</button>" +
+      '<button class="btn btn-sm btn-outline-secondary" data-action="move-entry-down" ' + (index === total - 1 ? "disabled" : "") + ">▼</button>" +
+      '<button class="btn btn-sm btn-outline-danger" data-action="remove-entry">×</button>' +
+    "</div>" +
+  "</div>";
+}
+function worldCategoryHtml(cat, index, total){
+  var open = isOpen("worldCategories", cat.id);
+  return "" +
+  '<div class="card panel-card mb-3" data-id="' + cat.id + '">' +
+    '<div class="card-header" data-toggle-panel="worldCategories">' +
+      '<div class="d-flex align-items-center gap-2">' +
+        '<span class="chevron">' + (open ? "▾" : "▸") + "</span>" +
+        '<strong class="cat-name-display">' + (esc(cat.name) || "Untitled Category") + "</strong>" +
+        '<span class="text-muted small">(' + cat.entries.length + " entries)</span>" +
+      "</div>" +
+      '<div class="d-flex align-items-center gap-1 header-actions" data-no-toggle>' +
+        '<button class="btn btn-sm btn-outline-secondary" data-action="move-cat-up" ' + (index === 0 ? "disabled" : "") + ">▲</button>" +
+        '<button class="btn btn-sm btn-outline-secondary" data-action="move-cat-down" ' + (index === total - 1 ? "disabled" : "") + ">▼</button>" +
+        '<button class="btn btn-sm btn-outline-danger" data-action="remove-category">Remove</button>' +
+      "</div>" +
+    "</div>" +
+    '<div class="panel-collapse' + (open ? " show" : "") + '">' +
+      '<div class="card-body">' +
+        '<label class="form-label">Category Name</label>' +
+        '<input type="text" class="form-control mb-3" data-field="catName" value="' + esc(cat.name) + '">' +
+        '<label class="form-label d-block">Entries</label>' +
+        '<div class="entries-list">' + cat.entries.map(function(en, i){ return worldEntryHtml(en, i, cat.entries.length); }).join("") + "</div>" +
+        '<button class="btn btn-sm btn-outline-secondary" data-action="add-entry" type="button">+ Add Entry</button>' +
+      "</div>" +
+    "</div>" +
+  "</div>";
+}
+function renderWorld(){
+  var list = document.getElementById("worldCategoriesList");
+  list.innerHTML = data.worldCategories.map(function(c, i){ return worldCategoryHtml(c, i, data.worldCategories.length); }).join("");
+  document.getElementById("worldEmptyMsg").classList.toggle("d-none", data.worldCategories.length > 0);
+}
+function bindWorldEvents(){
+  document.getElementById("addCategoryBtn").addEventListener("click", function(){
+    var input = document.getElementById("newCategoryName");
+    var name = input.value.trim();
+    if (!name) { input.focus(); return; }
+    var cat = { id: uid("cat"), name: name, entries: [] };
+    data.worldCategories.push(cat);
+    setOpen("worldCategories", cat.id, true);
+    input.value = "";
+    renderWorld();
+  });
+  var list = document.getElementById("worldCategoriesList");
+  list.addEventListener("click", function(e){
+    var toggleEl = e.target.closest('[data-toggle-panel="worldCategories"]');
+    if (toggleEl && !e.target.closest("[data-no-toggle]")) {
+      var cardEl = toggleEl.closest("[data-id]");
+      togglePanelState("worldCategories", cardEl.dataset.id);
+      renderWorld();
+      return;
+    }
+    var actionEl = e.target.closest("[data-action]");
+    if (!actionEl) return;
+    var card = actionEl.closest("[data-id]");
+    var catId = card.dataset.id;
+    var cat = data.worldCategories.find(function(c){ return c.id === catId; });
+    if (!cat) return;
+    var action = actionEl.dataset.action;
+    if (action === "remove-category") {
+      if (!confirm('Remove category "' + (cat.name || "Untitled Category") + '" and all its entries?')) return;
+      data.worldCategories = data.worldCategories.filter(function(c){ return c.id !== catId; });
+      delete data.panels.worldCategories[catId];
+      renderWorld();
+    } else if (action === "move-cat-up") { moveItem(data.worldCategories, catId, -1); renderWorld(); }
+    else if (action === "move-cat-down") { moveItem(data.worldCategories, catId, 1); renderWorld(); }
+    else if (action === "add-entry") { cat.entries.push({ id: uid("entry"), text:"" }); renderWorld(); }
+    else if (action === "remove-entry") {
+      var entryRow = actionEl.closest("[data-entry-id]");
+      cat.entries = cat.entries.filter(function(en){ return en.id !== entryRow.dataset.entryId; });
+      renderWorld();
+    } else if (action === "move-entry-up") {
+      var entryRowUp = actionEl.closest("[data-entry-id]");
+      moveItem(cat.entries, entryRowUp.dataset.entryId, -1); renderWorld();
+    } else if (action === "move-entry-down") {
+      var entryRowDown = actionEl.closest("[data-entry-id]");
+      moveItem(cat.entries, entryRowDown.dataset.entryId, 1); renderWorld();
+    }
+  });
+  list.addEventListener("input", function(e){
+    var field = e.target.dataset.field;
+    if (!field) return;
+    var card = e.target.closest("[data-id]");
+    var cat = data.worldCategories.find(function(c){ return c.id === card.dataset.id; });
+    if (!cat) return;
+    if (field === "catName") {
+      cat.name = e.target.value;
+      var disp = card.querySelector(".cat-name-display");
+      if (disp) disp.textContent = e.target.value || "Untitled Category";
+      return;
+    }
+    if (field === "entryText") {
+      var entryRow = e.target.closest("[data-entry-id]");
+      var entry = cat.entries.find(function(en){ return en.id === entryRow.dataset.entryId; });
+      if (entry) entry.text = e.target.value;
+    }
+  });
+}
+
+/* =========================================================
+   JS — Dashboard calculations & render
+   ========================================================= */
+function checkMilestones(){
+  var sessionWords = Math.max(0, totalManuscriptWords() - sessionStartWords);
+  var step = 500;
+  var currentMilestone = Math.floor(sessionWords / step) * step;
+  if (currentMilestone > lastMilestone && currentMilestone > 0) {
+    lastMilestone = currentMilestone;
+    showMilestoneToast("🎉 " + currentMilestone.toLocaleString() + " words written today!");
+  }
+}
+function showMilestoneToast(msg){
+  var el = document.getElementById("milestoneToast");
+  el.textContent = msg;
+  el.classList.remove("d-none");
+  requestAnimationFrame(function(){ el.classList.add("visible"); });
+  clearTimeout(showMilestoneToast._t);
+  showMilestoneToast._t = setTimeout(function(){
+    el.classList.remove("visible");
+    setTimeout(function(){ el.classList.add("d-none"); }, 300);
+  }, 3500);
+}
+function renderDashboard(){
+  var totalActual = totalManuscriptWords();
+  var target = num(data.overview.targetWordCount);
+  var pct = target > 0 ? Math.min(100, (totalActual / target) * 100) : 0;
+
+  var r = 52, circumference = 2 * Math.PI * r;
+  var offset = circumference * (1 - pct / 100);
+  document.getElementById("dashDonut").innerHTML =
+    '<svg width="140" height="140" viewBox="0 0 140 140">' +
+      '<circle cx="70" cy="70" r="' + r + '" fill="none" stroke="#fbe8de" stroke-width="16"></circle>' +
+      '<circle cx="70" cy="70" r="' + r + '" fill="none" stroke="#e0784f" stroke-width="16" stroke-dasharray="' + circumference + '" stroke-dashoffset="' + offset + '" stroke-linecap="round" transform="rotate(-90 70 70)"></circle>' +
+      '<text x="70" y="76" text-anchor="middle" font-size="20" font-weight="700" fill="#c05f39">' + pct.toFixed(0) + "%</text>" +
+    "</svg>";
+  document.getElementById("dashDonutText").textContent = totalActual.toLocaleString() + " / " + target.toLocaleString() + " words";
+
+  var counts = {};
+  STATUSES.forEach(function(s){ counts[s] = 0; });
+  data.chapters.forEach(function(c){ counts[c.status] = (counts[c.status] || 0) + 1; });
+  var maxCount = Math.max(1, data.chapters.length);
+  document.getElementById("dashChapterStatus").innerHTML = STATUSES.map(function(s){
+    var count = counts[s] || 0;
+    var w = (count / maxCount) * 100;
+    return '<div class="status-bar-row"><span class="label">' + s + '</span><div class="status-bar-track"><div class="status-bar-fill" style="width:' + w + '%"></div></div><span class="status-bar-count">' + count + "</span></div>";
+  }).join("");
+
+  var sessionWords = Math.max(0, totalActual - sessionStartWords);
+  document.getElementById("dashSessionWords").textContent = sessionWords.toLocaleString();
+  document.getElementById("dashSessionMsg").textContent = sessionWords > 0 ? "words written since you opened this session — nice work!" : "Start writing to see today's progress here.";
+
+  var protagonists = data.characters.filter(function(c){ return c.role === "Protagonist"; }).map(function(c){ return c.name || "(unnamed)"; });
+  var antagonists = data.characters.filter(function(c){ return c.role === "Antagonist"; }).map(function(c){ return c.name || "(unnamed)"; });
+  document.getElementById("dashCharacters").innerHTML =
+    '<p class="mb-2"><strong>' + data.characters.length + '</strong> total characters</p>' +
+    '<p class="small mb-1"><strong>Protagonists:</strong> ' + (protagonists.length ? esc(protagonists.join(", ")) : '<span class="text-muted">none</span>') + "</p>" +
+    '<p class="small mb-0"><strong>Antagonists:</strong> ' + (antagonists.length ? esc(antagonists.join(", ")) : '<span class="text-muted">none</span>') + "</p>";
+
+  var totalBeats = data.plot.beats.length;
+  var filledBeats = data.plot.beats.filter(function(b){ return b.text && b.text.trim(); }).length;
+  var plotPct = totalBeats > 0 ? (filledBeats / totalBeats) * 100 : 0;
+  if (!data.plot.template) {
+    document.getElementById("dashPlotCompletion").innerHTML = '<p class="text-muted small mb-0">No plot structure selected yet.</p>';
+  } else {
+    document.getElementById("dashPlotCompletion").innerHTML =
+      '<p class="small mb-1">' + filledBeats + " / " + totalBeats + " beats filled</p>" +
+      '<div class="progress"><div class="progress-bar accent-bar" style="width:' + plotPct + '%"></div></div>';
+  }
+}
+
+/* =========================================================
+   JS — localStorage save / load + autosave
+   ========================================================= */
+function updateLastSavedIndicator(){
+  var el = document.getElementById("lastSavedText");
+  el.textContent = data.lastSaved ? ("Last saved: " + new Date(data.lastSaved).toLocaleString()) : "Not saved yet";
+}
+function showStorageWarning(msg){
+  var el = document.getElementById("storageWarning");
+  el.textContent = msg;
+  el.classList.remove("d-none");
+}
+function hideStorageWarning(){ document.getElementById("storageWarning").classList.add("d-none"); }
+function showSavedToast(){
+  var el = document.getElementById("savedToast");
+  el.classList.remove("d-none");
+  requestAnimationFrame(function(){ el.classList.add("visible"); });
+  clearTimeout(showSavedToast._t);
+  showSavedToast._t = setTimeout(function(){
+    el.classList.remove("visible");
+    setTimeout(function(){ el.classList.add("d-none"); }, 300);
+  }, 1600);
+}
+function checkStorageSizeWarning(json){
+  var approxMB = json.length / (1024 * 1024);
+  if (approxMB > 4) {
+    showStorageWarning("Heads up: your saved project is getting large (~" + approxMB.toFixed(1) + " MB). Browser storage limits vary — consider exporting a manuscript backup via Print / Export as PDF periodically.");
+  }
+}
+function saveProject(){
+  try {
+    data.lastSaved = new Date().toISOString();
+    var json = JSON.stringify(data);
+    localStorage.setItem(STORAGE_KEY, json);
+    updateLastSavedIndicator();
+    hideStorageWarning();
+    checkStorageSizeWarning(json);
+    showSavedToast();
+  } catch (err) {
+    showStorageWarning("Could not save project: " + (err && err.message ? err.message : "storage error") + ". Your manuscript may be too large for browser storage, or storage is full/disabled. Consider exporting a backup via Print / Export.");
+  }
+}
+function loadFromStorage(){
+  var raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return false;
+  try {
+    data = normalizeData(JSON.parse(raw));
+    return true;
+  } catch (err) {
+    showStorageWarning("Saved project data could not be read and may be corrupted.");
+    return false;
+  }
+}
+
+/* =========================================================
+   JS — Print / export
+   ========================================================= */
+function buildPrintOutline(){
+  var o = data.overview;
+  var genre = o.genre === "other" ? o.genreOther : o.genre;
+  var pov = o.povStyle === "other" ? o.povOther : o.povStyle;
+  var audience = o.audience === "other" ? o.audienceOther : o.audience;
+  var html = "<h1>" + (esc(o.title) || "Untitled Novel") + "</h1>";
+  html += "<h2>Story Overview</h2>";
+  html += "<p><strong>Genre:</strong> " + (esc(genre) || "—") + " &nbsp; <strong>POV:</strong> " + (esc(pov) || "—") +
+    " &nbsp; <strong>Tense:</strong> " + esc(o.tense) + " &nbsp; <strong>Audience:</strong> " + (esc(audience) || "—") +
+    " &nbsp; <strong>Target Words:</strong> " + num(o.targetWordCount).toLocaleString() + "</p>";
+  if (o.logline) html += "<p><strong>Logline:</strong> " + nl2br(o.logline) + "</p>";
+  if (o.themes) html += "<p><strong>Themes / Tone:</strong> " + nl2br(o.themes) + "</p>";
+  html += "<h2>Plot Structure</h2>";
+  if (!data.plot.template || data.plot.beats.length === 0) { html += "<p>No plot structure defined.</p>"; }
+  else { data.plot.beats.forEach(function(b){ html += "<p><strong>" + esc(b.label) + ":</strong> " + (b.text && b.text.trim() ? nl2br(b.text) : "—") + "</p>"; }); }
+  html += "<h2>Chapters</h2>";
+  if (data.chapters.length === 0) { html += "<p>No chapters planned.</p>"; }
+  else { data.chapters.forEach(function(c){ html += "<p><strong>" + esc(chapterLabel(c)) + "</strong><br>" + esc(chapterExcerptText(c)) + "</p>"; }); }
+  html += "<h2>Characters</h2>";
+  if (data.characters.length === 0) { html += "<p>No characters defined.</p>"; }
+  else {
+    html += "<ul>";
+    data.characters.forEach(function(c){ html += "<li><strong>" + (esc(c.name) || "Unnamed") + "</strong> (" + esc(c.role) + ") — " + (esc(c.description) || esc(c.motivation) || "") + "</li>"; });
+    html += "</ul>";
+  }
+  document.getElementById("printOutline").innerHTML = html;
+}
+function buildPrintManuscript(){
+  var o = data.overview;
+  var genre = o.genre === "other" ? o.genreOther : o.genre;
+  var pov = o.povStyle === "other" ? o.povOther : o.povStyle;
+  var html = '<div class="print-title-page">' +
+      "<h1>" + (esc(o.title) || "Untitled Novel") + "</h1>" +
+      (o.logline ? '<p class="print-logline">' + nl2br(o.logline) + "</p>" : "") +
+      '<p class="print-meta">' + [esc(genre) || "", esc(pov) || "", esc(o.tense), num(o.targetWordCount).toLocaleString() + " words (target)"].filter(Boolean).join(" &middot; ") + "</p>" +
+    "</div>";
+  html += '<div class="print-toc"><h2>Table of Contents</h2><ul>' +
+    data.chapters.map(function(c){ return "<li>" + esc(chapterLabel(c)) + "</li>"; }).join("") +
+  "</ul></div>";
+  data.chapters.forEach(function(c){
+    html += '<div class="print-chapter-page"><h2 class="print-chapter-heading">' + esc(chapterLabel(c)) + '</h2><div class="print-body">' +
+      (c.content && c.content.trim() ? c.content : "<p><em>No content yet.</em></p>") + "</div></div>";
+  });
+  document.getElementById("printManuscript").innerHTML = html;
+}
+
+/* =========================================================
+   JS — Global render + init + event bindings
+   ========================================================= */
+function renderAll(){
+  fillOverviewForm();
+  renderCharacters();
+  document.getElementById("plotTemplateSelect").value = data.plot.template || "";
+  renderPlotBeats();
+  renderOutlinePreview();
+  renderChapterSidebar();
+  refreshManuscriptMain();
+  renderWorld();
+  renderDashboard();
+  updateManuscriptProgress();
+  updateLastSavedIndicator();
+  document.querySelectorAll(".ms-view-btn").forEach(function(b){ b.classList.toggle("active", b.dataset.view === data.prefs.manuscriptView); });
+}
+
+function bindGlobalEvents(){
+  document.getElementById("saveBtn").addEventListener("click", saveProject);
+
+  document.getElementById("clearSavedBtn").addEventListener("click", function(){
+    if (!confirm("Delete the saved project from this browser's storage? This cannot be undone.")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    data.lastSaved = null;
+    updateLastSavedIndicator();
+  });
+
+  document.getElementById("resetAllBtn").addEventListener("click", function(){
+    if (!confirm("Clear all data in the current session? Unsaved changes will be lost. (This does not delete any saved project already in browser storage.)")) return;
+    data = defaultData();
+    sessionStartWords = 0;
+    lastMilestone = 0;
+    renderAll();
+  });
+
+  document.getElementById("printOutlineBtn").addEventListener("click", function(){
+    buildPrintOutline();
+    document.body.classList.add("print-mode-outline");
+    window.print();
+  });
+  document.getElementById("printManuscriptBtn").addEventListener("click", function(){
+    buildPrintManuscript();
+    document.body.classList.add("print-mode-manuscript");
+    window.print();
+  });
+  window.addEventListener("afterprint", function(){
+    document.body.classList.remove("print-mode-outline", "print-mode-manuscript");
+  });
+
+  document.getElementById("dashboardTabBtn").addEventListener("shown.bs.tab", renderDashboard);
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  bindOverviewForm();
+  bindCharacterEvents();
+  bindPlotEvents();
+  bindChapterSidebarEvents();
+  bindManuscriptEditorEvents();
+  bindWorldEvents();
+  bindGlobalEvents();
+
+  var hasSaved = !!localStorage.getItem(STORAGE_KEY);
+  if (hasSaved && confirm("A previous project was found. Load it?")) {
+    loadFromStorage();
+  } else {
+    data = defaultData();
+  }
+
+  data.chapters.forEach(function(c){ c.wordActual = wordsFromHtml(c.content); });
+  if (!data.currentChapterId && data.chapters.length) data.currentChapterId = data.chapters[0].id;
+  sessionStartWords = totalManuscriptWords();
+  lastMilestone = 0;
+
+  applyEditorFont();
+  document.getElementById("manuscriptShell").classList.toggle("sidebar-hidden", !!data.panels.sidebarCollapsed);
+
+  renderAll();
+
+  setInterval(function(){ saveProject(); }, 45000);
+});
+
+})();
+</script>
+</body>
+</html>
